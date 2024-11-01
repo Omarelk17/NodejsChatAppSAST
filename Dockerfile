@@ -4,14 +4,14 @@ FROM node:23
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json from the current directory
-COPY package*.json ./
+# Copy package.json and package-lock.json from your app folder
+COPY app/package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application code from the current directory
-COPY . .
+# Copy the rest of the application code
+COPY app .
 
 # Expose the port the app runs on
 EXPOSE 3700
