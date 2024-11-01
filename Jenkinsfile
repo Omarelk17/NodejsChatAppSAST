@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'omarelk18/nodejschatapp'
-        GIT_REPO = 'https://github.com/Omarelk17/NodejsChatApp'
+        DOCKER_IMAGE = 'omarelk18/nodejschatappsast'
+        GIT_REPO = 'https://github.com/Omarelk17/nodejschatappsast'
     }
 
     stages {
