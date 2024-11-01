@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'omarelk18/nodejschatappsast'
+        DOCKER_IMAGE = 'omarelk18/nodejschatapp'
         GIT_REPO = 'https://github.com/Omarelk17/NodejsChatApp'
     }
 
@@ -22,7 +22,7 @@ pipeline {
         stage('Run Application') {
             steps {
                 sh 'docker compose -f docker-compose.yml up -d'
-                sleep 15 // Allow some time for the app to start
+                sleep 15 // Allow som e time for the app to start
             }
         }
 
