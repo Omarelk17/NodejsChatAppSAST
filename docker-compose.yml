@@ -13,4 +13,8 @@ services:
       - /app/node_modules # Ensure local dependencies don't override container ones
     environment:
       - NODE_ENV=development
-    command: ["npm", "start"] # Ensures app starts with npm start
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3700"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
