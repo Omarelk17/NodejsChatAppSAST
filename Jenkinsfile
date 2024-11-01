@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'omarelk18/nodejschatapp'
-        GIT_REPO = 'https://github.com/Omarelk17/NodejsChatApp'
+        DOCKER_IMAGE = 'omarelk18/nodejschatappsast'
+        GIT_REPO = 'https://github.com/Omarelk17/NodejsChatAppSAST'
     }
 
     stages {
@@ -19,10 +19,22 @@ pipeline {
             }
         }
 
+        stage('Snyk Security Scan') {
+            steps {
+                script {
+                    try {
+                        sh 'snyk test' // Run Snyk scan
+                    } catch (Exception e) {
+                        error "Build failed due to vulnerabilities detected by Snyk."
+                    }
+                }
+            }
+        }
+
         stage('Run Application') {
             steps {
                 sh 'docker compose -f docker-compose.yml up -d'
-                sleep 15 // Allow som e time for the app to start
+                sleep 15 // Allow time for the app to start
             }
         }
 
