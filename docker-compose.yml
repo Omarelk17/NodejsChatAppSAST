@@ -1,20 +1,6 @@
-version: '3.8'
-
+version: '3'
 services:
-  app:
-    image: nodejschatappsast
-    build:
-      context: .
-      dockerfile: Dockerfile
+  nodejschatapp:
+    build: .
     ports:
       - "3700:3700"
-    volumes:
-      - ./app:/app
-      - /app/node_modules # Ensure local dependencies don't override container ones
-    environment:
-      - NODE_ENV=development
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3700"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
