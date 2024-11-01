@@ -3,54 +3,38 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'omarelk18/nodejschatappsast'
-        GIT_REPO = 'https://github.com/Omarelk17/nodejschatappsast'
+        GIT_REPO = 'https://github.com/Omarelk17/NodejsChatApp'
     }
 
     stages {
-        stage('Clone and Build') {
+        stage('Clone Repository') {
             steps {
-                script {
-                    echo 'Cloning GitHub Repository and Building Docker Image...'
-                    
-                    // Clone the repository
-                    git branch: 'main', url: "${env.GIT_REPO}"
-
-                    // Clean up previous builds (optional)
-                    sh "docker compose -f docker-compose.yml down || true"
-                    sh "docker image rm -f ${DOCKER_IMAGE}:latest || true"
-                    sh "docker image rm -f ${DOCKER_IMAGE}:${BUILD_NUMBER} || true"
-
-                    // Build the Docker image
-                    sh "docker compose -f docker-compose.yml build app"
-                    sh "docker tag omarelk18/nodejschatapp ${DOCKER_IMAGE}:latest"
-                    sh "docker tag omarelk18/nodejschatapp ${DOCKER_IMAGE}:${BUILD_NUMBER}"
-                }
+                git branch: 'main', url: "${env.GIT_REPO}"
             }
         }
 
-        stage('Push to Docker Hub') {
+        stage('Build Docker Image') {
             steps {
-                script {
-                    echo 'Pushing Docker Image to Docker Hub...'
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        // Log in to Docker Hub
-                        sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
-
-                        // Push images to Docker Hub
-                        sh "docker push ${DOCKER_IMAGE}:latest"
-                        sh "docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}"
-                    }
-                }
+                sh 'docker compose -f docker-compose.yml build'
             }
         }
 
         stage('Run Application') {
             steps {
+                sh 'docker compose -f docker-compose.yml up -d'
+                sleep 15 // Allow some time for the app to start
+            }
+        }
+
+        stage('Test Application') {
+            steps {
                 script {
-                    echo 'Running Docker Application with Docker Compose...'
-                    
-                    // Start the application in detached mode
-                    sh "docker compose -f docker-compose.yml up -d"
+                    def response = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://localhost:3700", returnStdout: true).trim()
+                    if (response != '200') {
+                        error "Application is not running! HTTP Response: ${response}"
+                    } else {
+                        echo "Application is running successfully! HTTP Response: ${response}"
+                    }
                 }
             }
         }
@@ -58,18 +42,7 @@ pipeline {
 
     post {
         always {
-            script {
-                echo 'Cleaning up unused Docker resources...'
-                // Stop containers and clean up dangling images
-                sh "docker compose -f docker-compose.yml down"
-                sh "docker system prune -f"
-            }
-        }
-        success {
-            echo 'Pipeline completed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed. Please check the logs for errors.'
+            sh 'docker compose -f docker-compose.yml down'
         }
     }
 }
